@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	ffmpeg "github.com/rizasghari/video_editor_ffmpeg/internal/convertor"
+	"github.com/rizasghari/video_editor_ffmpeg/internal/ffmpeg"
 )
 
 func main() {
