@@ -4,38 +4,43 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os/exec"
 	"path/filepath"
+	"time"
+
+	ffmpeg "github.com/rizasghari/video_editor_ffmpeg/internal/convertor"
 )
 
 func main() {
-    videoPath := flag.String("video", "", "Path to the input video file")
+    act := flag.String("action", "convert", "Action to perform: convert or thumbnail")
+
+    videoPath := flag.String("input", "", "Path to the input video file")
     timestamp := flag.Int("timestamp", 0, "Timestamp (in seconds) to capture the thumbnail")
     outputDir := flag.String("output", ".", "Directory to save the thumbnail image")
 
     flag.Parse()
 
-    if *videoPath == "" || *timestamp < 0 {
-        log.Fatal("You must specify a valid video path and a non-negative timestamp.")
-    }
+    ffmpeg := ffmpeg.New()
 
-    outputPath := filepath.Join(*outputDir, "thumbnail.jpg")
+    switch *act {   
+    case "convert":
+        // err := ffmpeg.Convert(*videoPath, *outputDir)
+        // if err != nil {
+        //     log.Fatal("Error converting video:", err)
+        // }
 
-    err := GenerateThumbnail(*videoPath, *timestamp, outputPath)
-    if err != nil {
-        log.Fatal("Error generating thumbnail:", err)
-    }
-
-    fmt.Println("Thumbnail generated successfully at", outputPath)
+        // fmt.Println("Video converted successfully")
+    case "thumbnail":
+        if *videoPath == "" || *timestamp < 0 {
+            log.Fatal("You must specify a valid video path and a non-negative timestamp.")
+        }
+        time := fmt.Sprintf("%d", time.Now().Unix())
+        outputPath := filepath.Join(*outputDir, fmt.Sprintf("thumbnail-%s.jpg", time))
+        err := ffmpeg.GenerateThumbnail(*videoPath, *timestamp, outputPath)
+        if err != nil {
+            log.Fatal("Error generating thumbnail:", err)
+        }
+    
+        fmt.Println("Thumbnail generated successfully at", outputPath)
+    } 
 }
 
-func GenerateThumbnail(videoPath string, timestamp int, outputPath string) error {
-    cmd := exec.Command("ffmpeg", "-ss", fmt.Sprintf("%d", timestamp), "-i", videoPath, "-vframes", "1", "-q:v", "2", outputPath)
-
-    err := cmd.Run()
-    if err != nil {
-        return fmt.Errorf("ffmpeg error: %v", err)
-    }
-
-    return nil
-}
