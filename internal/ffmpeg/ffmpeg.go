@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"path/filepath"
+	"time"
 
 	"github.com/rizasghari/medigo/internal/utils"
 )
@@ -18,14 +20,13 @@ func (f *FFMPEG) Convert(videoPath string, outputPath string, outputFormat strin
 	return nil
 }
 
-func (f *FFMPEG) GenerateThumbnail(videoPath string, timestamp int, outputPath string) error {
-    cmd := exec.Command("ffmpeg", "-ss", fmt.Sprintf("%d", timestamp), "-i", videoPath, "-vframes", "1", "-q:v", "2", outputPath)
-
+func (f *FFMPEG) GenerateThumbnail(input string, timestamp int, output string) error {
+	output = filepath.Join(output, fmt.Sprintf("thumbnail-%v.jpg", time.Now().Unix()))
+    cmd := exec.Command("ffmpeg", "-ss", fmt.Sprintf("%d", timestamp), "-i", input, "-vframes", "1", "-q:v", "2", output)
     err := cmd.Run()
     if err != nil {
         return fmt.Errorf("ffmpeg error: %v", err)
     }
-
     return nil
 }
 

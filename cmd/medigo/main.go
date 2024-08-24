@@ -11,7 +11,6 @@ import "github.com/rizasghari/medigo/cmd"
 // "github.com/rizasghari/medigo/internal/ffmpeg"
 
 func main() {
-
     cmd.Execute()
     // act := flag.String("action", "convert", "Action to perform: convert or thumbnail")
 
