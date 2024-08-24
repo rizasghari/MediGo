@@ -2,35 +2,45 @@ package ffmpeg
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
-	"path/filepath"
-	"time"
 
 	"github.com/rizasghari/medigo/internal/utils"
 )
 
-type FFMPEG struct{}
+type FFMPEGWrapper struct{}
 
-func New() *FFMPEG {
-	return &FFMPEG{}
+func New() *FFMPEGWrapper {
+	return &FFMPEGWrapper{}
 }
 
-func (f *FFMPEG) Convert(videoPath string, outputPath string, outputFormat string) error {
+func (fw *FFMPEGWrapper) Convert(videoPath string, outputPath string, outputFormat string) error {
 	return nil
 }
 
-func (f *FFMPEG) GenerateThumbnail(input string, timestamp int, output string) error {
-	output = filepath.Join(output, fmt.Sprintf("thumbnail-%v.jpg", time.Now().Unix()))
-    cmd := exec.Command("ffmpeg", "-ss", fmt.Sprintf("%d", timestamp), "-i", input, "-vframes", "1", "-q:v", "2", output)
-    err := cmd.Run()
-    if err != nil {
-        return fmt.Errorf("ffmpeg error: %v", err)
-    }
-    return nil
+func (fw *FFMPEGWrapper) GenerateThumbnail(input string, timestamp int, output string) error {
+	cmd := exec.Command("ffmpeg", "-ss", fmt.Sprintf("%d", timestamp), "-i", input, "-vframes", "1", "-q:v", "2", output)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (f FFMPEG) ScreenRecord() {
-    os := utils.GetOS()
-    log.Printf("OS: %s", os)
+func (fw FFMPEGWrapper) ScreenRecord() error {
+	if utils.IsWindoes() {
+		// TODO
+	} else if utils.IsLinux() {
+		// TODO
+	} else if utils.IsMacOS() {
+		// cmd := exec.Command("ffmpeg", "-f", "avfoundation", "-list_devices", "true", "-i", "\"\"")
+        cmd := exec.Command("ffmpeg", "-f", "avfoundation", "-i", "2:1", "output.mkv")
+		err := cmd.Run()
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("unsupported os")
+	}
+
+	return nil
 }

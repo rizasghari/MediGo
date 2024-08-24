@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	ff "github.com/rizasghari/medigo/internal/ffmpeg"
+	"github.com/rizasghari/medigo/internal/ffmpeg"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	ffmpeg = ff.New()
+	ffmpegWrapper = ffmpeg.New()
 )
 
 var (
@@ -22,6 +22,10 @@ var (
 	input     string
 	output    string
 	timestamp int
+
+	// Record
+	video bool
+	audio bool
 )
 
 var (
@@ -43,21 +47,26 @@ var (
 		},
 	}
 
-	videoThumbnail = &cobra.Command{
+	videoThumbnailCmd = &cobra.Command{
 		Use:   "thumbnail",
 		Short: "Generate video thumbnail",
 		Long:  `Generate video thumbnail from video file`,
 		Run: func(cmd *cobra.Command, args []string) {
-			// log.Println("TODO: Implement video thumbnail command")
-
-			// for arg := range args {
-			// 	fmt.Println(args[arg])
-			// }
-			// log.Printf("input: %s, output: %s, timestamp: %d", input, output, timestamp)
-
-			err := ffmpeg.GenerateThumbnail(input, timestamp, output)
+			err := ffmpegWrapper.GenerateThumbnail(input, timestamp, output)
 			if err != nil {
 				log.Fatal("Error generating thumbnail:", err)
+			}
+		},
+	}
+
+	recordCmd = &cobra.Command{
+		Use:   "record",
+		Short: "Record your screen and audio",
+		Long:  `Record your screen and audio`,
+		Run: func(cmd *cobra.Command, args []string) {
+			err := ffmpegWrapper.ScreenRecord()
+			if err != nil {
+				log.Fatal("Error recording:", err)
 			}
 		},
 	}
@@ -65,19 +74,23 @@ var (
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(videoThumbnail)
+	rootCmd.AddCommand(videoThumbnailCmd)
+	rootCmd.AddCommand(recordCmd)
 }
 
 func setFlags() {
 	// Video Thumbnail
-	videoThumbnail.Flags().StringVarP(&input, "input", "i", "", "Path to the input file")
-	videoThumbnail.MarkFlagRequired("input")
+	videoThumbnailCmd.Flags().StringVarP(&input, "input", "i", "", "Path to the input file")
+	videoThumbnailCmd.MarkFlagRequired("input")
+	videoThumbnailCmd.Flags().StringVarP(&output, "output", "o", ".", "Directory to save the output file")
+	videoThumbnailCmd.MarkFlagRequired("output")
+	videoThumbnailCmd.Flags().IntVarP(&timestamp, "timestamp", "t", 1, "Timestamp (in seconds)")
+	videoThumbnailCmd.MarkFlagRequired("timestamp")
 
-	videoThumbnail.Flags().StringVarP(&output, "output", "o", ".", "Directory to save the output file")
-	videoThumbnail.MarkFlagRequired("output")
-
-	videoThumbnail.Flags().IntVarP(&timestamp, "timestamp", "t", 1, "Timestamp (in seconds)")
-	videoThumbnail.MarkFlagRequired("timestamp")
+	// Record
+	recordCmd.Flags().BoolVarP(&video, "video", "v", true, "Record video")
+	recordCmd.Flags().BoolVarP(&audio, "audio", "a", true, "Record audio")
+	recordCmd.MarkFlagsOneRequired("video", "audio")
 }
 
 func Execute() {

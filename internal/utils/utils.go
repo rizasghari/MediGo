@@ -14,3 +14,15 @@ func GetOS() string {
 		return runtime.GOOS
 	}
 }
+
+func IsWindoes() bool {
+	return GetOS() == "windows"
+}
+
+func IsLinux() bool {
+	return GetOS() == "Linux"
+}
+
+func IsMacOS() bool {
+	return GetOS() == "macOS"
+}
