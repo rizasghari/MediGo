@@ -2,7 +2,10 @@ package ffmpeg
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
+
+	"github.com/rizasghari/medigo/internal/utils"
 )
 
 type FFMPEG struct{}
@@ -24,4 +27,9 @@ func (f *FFMPEG) GenerateThumbnail(videoPath string, timestamp int, outputPath s
     }
 
     return nil
+}
+
+func (f FFMPEG) ScreenRecord() {
+    os := utils.GetOS()
+    log.Printf("OS: %s", os)
 }

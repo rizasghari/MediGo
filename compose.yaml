@@ -1,0 +1,7 @@
+services:
+  medigo:
+    container_name: medigo
+    build: .
+    ports:
+      - 8000:8000
+    entrypoint: ./medigo
