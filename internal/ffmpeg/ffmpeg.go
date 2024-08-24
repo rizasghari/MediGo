@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/rizasghari/medigo/internal/utils"
 )
@@ -16,6 +17,32 @@ func New() *FFMPEGWrapper {
 }
 
 func (fw *FFMPEGWrapper) Convert(videoPath string, outputPath string, outputFormat string) error {
+	return nil
+}
+
+func (fw *FFMPEGWrapper) Compress(inputFile string) error {
+	vcodec, acodec, formatOpt, outputFile := utils.GetCodecOptions(inputFile)
+	args := []string{
+		"-i", inputFile,
+		"-c:v", vcodec,
+		"-crf", "23",
+		"-preset", "medium",
+		"-c:a", acodec,
+	}
+
+	if formatOpt != "" {
+		args = append(args, strings.Fields(formatOpt)...)
+	}
+
+	args = append(args, outputFile)
+
+	cmd := exec.Command("ffmpeg", args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg command failed: %s\nOutput: %s", err, output)
+	}
+
+	fmt.Printf("FFmpeg Output: %s\n", output)
 	return nil
 }
 
@@ -31,10 +58,10 @@ func (fw *FFMPEGWrapper) GenerateThumbnail(input string, timestamp int, output s
 func (fw FFMPEGWrapper) ListInputDevices() error {
 	cmd := exec.Command("ffmpeg", "-f", "avfoundation", "-list_devices", "true", "-i", "\"\"")
 
-	cmd.Env = os.Environ() 
+	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	
+
 	err := cmd.Run()
 	if err != nil {
 		return err
@@ -66,7 +93,7 @@ func (fw FFMPEGWrapper) ScreenRecord(video, audio bool) error {
 		cmd := exec.Command("ffmpeg", "-v", "verbose", "-f", "avfoundation", "-framerate", "30", "-i", fmt.Sprintf("%s:%s", videoInput, audioInput), "-pix_fmt", "yuv420p", "./record.mp4")
 		log.Printf("cmd: %v", cmd)
 
-		cmd.Env = os.Environ() 
+		cmd.Env = os.Environ()
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 

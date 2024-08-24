@@ -23,6 +23,9 @@ var (
 	output    string
 	timestamp int
 
+	// Video Compress
+	inputFile string
+
 	// Record
 	video bool
 	audio bool
@@ -82,6 +85,18 @@ var (
 			}
 		},
 	}
+
+	compressVideoCmd = &cobra.Command{
+		Use:   "compress",
+		Short: "Compress video",
+		Long:  `Supported video formats: mp4, webm, mkv, mov, avi, flv"`,
+		Run: func(cmd *cobra.Command, args []string) {
+			err := ffmpegWrapper.Compress(inputFile)
+			if err != nil {
+				log.Fatal("Error compressing video:", err)
+			}
+		},
+	}
 )
 
 func init() {
@@ -89,6 +104,7 @@ func init() {
 	rootCmd.AddCommand(videoThumbnailCmd)
 	rootCmd.AddCommand(recordCmd)
 	rootCmd.AddCommand(listInputDevices)
+	rootCmd.AddCommand(compressVideoCmd)
 }
 
 func setFlags() {
@@ -104,6 +120,10 @@ func setFlags() {
 	recordCmd.Flags().BoolVarP(&video, "video", "v", false, "Record video")
 	recordCmd.Flags().BoolVarP(&audio, "audio", "a", false, "Record audio")
 	recordCmd.MarkFlagsOneRequired("video", "audio")
+
+	// Compress
+	compressVideoCmd.Flags().StringVarP(&inputFile, "source", "s", "", "Path to the input file")
+	compressVideoCmd.MarkFlagRequired("source")
 }
 
 func Execute() {
