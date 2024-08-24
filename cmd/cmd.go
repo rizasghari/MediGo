@@ -59,12 +59,24 @@ var (
 		},
 	}
 
+	listInputDevices = &cobra.Command{
+		Use:   "devices",	
+		Short: "List input devices",
+		Long:  `List input devices`,
+		Run: func(cmd *cobra.Command, args []string) {
+			err := ffmpegWrapper.ListInputDevices()
+			if err != nil {
+				log.Fatal("Error listing input devices:", err)
+			}
+		},
+	}
+
 	recordCmd = &cobra.Command{
 		Use:   "record",
 		Short: "Record your screen and audio",
 		Long:  `Record your screen and audio`,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := ffmpegWrapper.ScreenRecord()
+			err := ffmpegWrapper.ScreenRecord(video, audio)
 			if err != nil {
 				log.Fatal("Error recording:", err)
 			}
@@ -76,6 +88,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(videoThumbnailCmd)
 	rootCmd.AddCommand(recordCmd)
+	rootCmd.AddCommand(listInputDevices)
 }
 
 func setFlags() {
@@ -88,8 +101,8 @@ func setFlags() {
 	videoThumbnailCmd.MarkFlagRequired("timestamp")
 
 	// Record
-	recordCmd.Flags().BoolVarP(&video, "video", "v", true, "Record video")
-	recordCmd.Flags().BoolVarP(&audio, "audio", "a", true, "Record audio")
+	recordCmd.Flags().BoolVarP(&video, "video", "v", false, "Record video")
+	recordCmd.Flags().BoolVarP(&audio, "audio", "a", false, "Record audio")
 	recordCmd.MarkFlagsOneRequired("video", "audio")
 }
 
